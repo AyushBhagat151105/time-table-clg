@@ -28,10 +28,10 @@ type ScheduleItem = {
   classId: string
 }
 
-let teachers: Teacher[] = []
-let courses: Course[] = []
-let classes: Class[] = []
-let schedule: ScheduleItem[] = []
+const teachers: Teacher[] = []
+const courses: Course[] = []
+const classes: Class[] = []
+const schedule: ScheduleItem[] = []
 
 export async function addTeacher(formData: FormData) {
   try {
