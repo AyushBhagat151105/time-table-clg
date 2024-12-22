@@ -1,121 +1,138 @@
-// Define the structure for a Teacher object with id and name properties
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 type Teacher = {
-  id: string // Unique identifier for the teacher
-  name: string // Name of the teacher
-}
+  id: string;
+  name: string;
+};
 
-// Define the structure for a Course object with id, name, and teacherId properties
 type Course = {
-  id: string // Unique identifier for the course
-  name: string // Name of the course
-  teacherId: string // ID of the teacher assigned to this course
-}
+  id: string;
+  name: string;
+  teacherId: string;
+};
 
-// Define the structure for a Class object with id, name, and roomNumber properties
 type Class = {
-  id: string // Unique identifier for the class
-  name: string // Name of the class
-  roomNumber: string // Room number where the class is held
-}
+  id: string;
+  name: string;
+  roomNumber: string;
+};
 
-// Define the structure for a ScheduleItem object with id, day, time, courseId, and classId properties
 type ScheduleItem = {
-  id: string // Unique identifier for the schedule item
-  day: string // Day of the week (e.g., Monday, Tuesday)
-  time: string // Time of the class (e.g., "10:00")
-  courseId: string // ID of the course being held
-  classId: string // ID of the class where the course is held
-}
+  id: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  courseId: string;
+  classId: string;
+};
 
-// Define the props structure for the ScheduleDisplay component
 type ScheduleDisplayProps = {
-  schedule: ScheduleItem[] // Array of schedule items to be displayed
-  courses: Course[] // Array of all courses
-  teachers: Teacher[] // Array of all teachers
-  classes: Class[] // Array of all classes
+  schedule: ScheduleItem[];
+  courses: Course[];
+  teachers: Teacher[];
+  classes: Class[];
+  clearSchedule: () => void;
+};
+
+// Extend jsPDF to include autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (columns: string[], rows: string[][], options?: object) => void;
+  }
 }
 
-// ScheduleDisplay component renders the schedule in a table format
-export default function ScheduleDisplay({ schedule, courses, teachers, classes }: ScheduleDisplayProps) {
-  // List of days to display in the schedule table
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+export default function ScheduleDisplay({ schedule, courses, teachers, classes, clearSchedule }: ScheduleDisplayProps) {
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // Function to get the course name based on the courseId
   const getCourseName = (courseId: string) => {
-    // Find the course matching the provided ID
-    const course = courses.find(c => c.id === courseId)
-    // Return the course name or 'Unknown Course' if not found
-    return course ? course.name : 'Unknown Course'
-  }
+    const course = courses.find(c => c.id === courseId);
+    return course ? course.name : 'Unknown Course';
+  };
 
-  // Function to get the teacher's name for a given courseId
   const getTeacherName = (courseId: string) => {
-    // Find the course matching the provided ID
-    const course = courses.find(c => c.id === courseId)
+    const course = courses.find(c => c.id === courseId);
     if (course) {
-      // Find the teacher assigned to the course
-      const teacher = teachers.find(t => t.id === course.teacherId)
-      // Return the teacher's name or 'Unknown Teacher' if not found
-      return teacher ? teacher.name : 'Unknown Teacher'
+      const teacher = teachers.find(t => t.id === course.teacherId);
+      return teacher ? teacher.name : 'Unknown Teacher';
     }
-    return 'Unknown Teacher'
-  }
+    return 'Unknown Teacher';
+  };
 
-  // Function to get the class name and room number based on the classId
   const getClassName = (classId: string) => {
-    // Find the class matching the provided ID
-    const classItem = classes.find(c => c.id === classId)
-    // Return the class name and room number or 'Unknown Class' if not found
-    return classItem ? `${classItem.name} (Room ${classItem.roomNumber})` : 'Unknown Class'
-  }
+    const classItem = classes.find(c => c.id === classId);
+    return classItem ? `${classItem.name} (Room ${classItem.roomNumber})` : 'Unknown Class';
+  };
 
-  // Render the schedule table
+  const formatTime = (time: string) => {
+    const [hour, minute] = time.split(':').map(Number);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minute.toString().padStart(2, '0')} ${period}`;
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ['Day', 'Time', 'Course', 'Teacher', 'Class'];
+    const tableRows: string[][] = [];
+
+    schedule.forEach(item => {
+      const courseName = getCourseName(item.courseId);
+      const teacherName = getTeacherName(item.courseId);
+      const className = getClassName(item.classId);
+      const time = `${formatTime(item.startTime)} - ${formatTime(item.endTime)}`;
+      tableRows.push([item.day, time, courseName, teacherName, className]);
+    });
+
+    doc.autoTable(tableColumn, tableRows, { startY: 20 });
+    doc.text('Schedule', 14, 15);
+    doc.save('schedule.pdf');
+  };
+
   return (
       <div className="overflow-x-auto">
-        {/* Table to display the schedule */}
+        <div className="flex justify-between mb-4">
+          <button onClick={generatePDF} className="px-4 py-2 bg-green-500 text-white rounded">Export to PDF</button>
+          <button onClick={clearSchedule} className="px-4 py-2 bg-red-500 text-white rounded">Clear Schedule</button>
+        </div>
         <table className="min-w-full bg-white border border-gray-300">
-          {/* Table header */}
           <thead>
           <tr>
-            {/* First column header for Day/Time */}
             <th className="border p-2">Day/Time</th>
-            {/* Headers for each day of the week */}
             {days.map(day => (
                 <th key={day} className="border p-2">{day}</th>
             ))}
           </tr>
           </thead>
-          {/* Table body */}
           <tbody>
-          {/* Loop through each hour of the day (24-hour format) */}
-          {Array.from({ length: 24 }, (_, hour) => (
-              <tr key={hour}>
-                {/* First column for the time slot (e.g., "08:00") */}
-                <td className="border p-2">{`${hour.toString().padStart(2, '0')}:00`}</td>
-                {/* Columns for each day of the week */}
+          {Array.from({ length: 18 * 2 }, (_, i) => {
+            const hour = Math.floor(i / 2) + 8;
+            const minute = i % 2 === 0 ? '00' : '30';
+            return `${hour}:${minute}`;
+          }).map(time => (
+              <tr key={time}>
+                <td className="border p-2">{formatTime(time)}</td>
                 {days.map(day => {
-                  // Find the schedule item matching the current day and hour
-                  const item = schedule.find(s => s.day === day && parseInt(s.time.split(':')[0]) === hour)
+                  const item = schedule.find(s => s.day === day && s.startTime === time);
                   return (
-                      <td key={`${day}-${hour}`} className="border p-2">
-                        {/* If a schedule item exists, display its details */}
+                      <td key={`${day}-${time}`} className="border p-2">
                         {item && (
                             <div>
-                              {/* Display the course name */}
                               <div>{getCourseName(item.courseId)}</div>
-                              {/* Display the teacher's name */}
                               <div className="text-sm text-gray-500">{getTeacherName(item.courseId)}</div>
-                              {/* Display the class name and room number */}
                               <div className="text-sm text-gray-500">{getClassName(item.classId)}</div>
+                              <div className="text-sm text-gray-500">
+                                {formatTime(item.startTime)} - {formatTime(item.endTime)}
+                              </div>
                             </div>
                         )}
                       </td>
-                  )
+                  );
                 })}
               </tr>
           ))}
           </tbody>
         </table>
       </div>
-  )
+  );
 }

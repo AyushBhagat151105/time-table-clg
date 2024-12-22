@@ -1,40 +1,39 @@
-'use client'; // This directive indicates the component is client-side rendered.
+'use client';
 
-import { useState } from 'react'; // Import useState for managing state within the component.
-import { addTeacher, addCourse, addClass, addScheduleItem } from '@/app/actions'; // Import functions to handle adding teachers, courses, classes, and schedule items.
+import { useState } from 'react';
 
-// Define TypeScript types for data structures.
 type Teacher = {
-    id: string; // Unique ID for the teacher.
-    name: string; // Name of the teacher.
+    id: string;
+    name: string;
 };
 
 type Course = {
-    id: string; // Unique ID for the course.
-    name: string; // Name of the course.
-    teacherId: string; // ID of the teacher associated with the course.
+    id: string;
+    name: string;
+    teacherId: string;
 };
 
 type Class = {
-    id: string; // Unique ID for the class.
-    name: string; // Name of the class.
-    roomNumber: string; // Room number of the class.
+    id: string;
+    name: string;
+    roomNumber: string;
 };
 
 type SchedulerFormProps = {
-    teachers?: Teacher[]; // Array of teacher objects (optional).
-    courses?: Course[]; // Array of course objects (optional).
-    classes?: Class[]; // Array of class objects (optional).
+    teachers?: Teacher[];
+    courses?: Course[];
+    classes?: Class[];
+    onAddTeacher: (formData: FormData) => void;
+    onAddCourse: (formData: FormData) => void;
+    onAddClass: (formData: FormData) => void;
+    onAddScheduleItem: (formData: FormData) => void;
 };
 
-export default function SchedulerForm({ teachers = [], courses = [], classes = [] }: SchedulerFormProps) {
-    // Manage the active form (teacher, course, class, or schedule).
+export default function SchedulerForm({ teachers = [], courses = [], classes = [], onAddTeacher, onAddCourse, onAddClass, onAddScheduleItem }: SchedulerFormProps) {
     const [activeForm, setActiveForm] = useState<'teacher' | 'course' | 'class' | 'schedule'>('teacher');
 
-    // Render the form based on the selected active form.
     return (
         <div className="space-y-4">
-            {/* Buttons to switch between different forms */}
             <div className="flex flex-wrap gap-2">
                 {['teacher', 'course', 'class', 'schedule'].map((form) => (
                     <button
@@ -47,13 +46,12 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                 ))}
             </div>
 
-            {/* Form for adding a teacher */}
             {activeForm === 'teacher' && (
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         const formData = new FormData(e.target as HTMLFormElement);
-                        addTeacher(formData);
+                        onAddTeacher(formData);
                     }}
                     className="space-y-2"
                 >
@@ -64,13 +62,12 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                 </form>
             )}
 
-            {/* Form for adding a course */}
             {activeForm === 'course' && (
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         const formData = new FormData(e.target as HTMLFormElement);
-                        addCourse(formData);
+                        onAddCourse(formData);
                     }}
                     className="space-y-2"
                 >
@@ -89,13 +86,12 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                 </form>
             )}
 
-            {/* Form for adding a class */}
             {activeForm === 'class' && (
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         const formData = new FormData(e.target as HTMLFormElement);
-                        addClass(formData);
+                        onAddClass(formData);
                     }}
                     className="space-y-2"
                 >
@@ -107,13 +103,12 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                 </form>
             )}
 
-            {/* Form for adding a schedule item */}
             {activeForm === 'schedule' && (
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         const formData = new FormData(e.target as HTMLFormElement);
-                        addScheduleItem(formData);
+                        onAddScheduleItem(formData);
                     }}
                     className="space-y-2"
                 >
@@ -125,7 +120,8 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                             </option>
                         ))}
                     </select>
-                    <input type="time" name="time" className="w-full p-2 border rounded" required />
+                    <input type="time" name="startTime" className="w-full p-2 border rounded" required />
+                    <input type="time" name="endTime" className="w-full p-2 border rounded" required />
                     <select name="courseId" className="w-full p-2 border rounded" required>
                         <option value="">Select Course</option>
                         {courses.map((course) => (
