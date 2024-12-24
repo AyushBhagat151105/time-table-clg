@@ -31,6 +31,15 @@ type SchedulerFormProps = {
 
 export default function SchedulerForm({ teachers = [], courses = [], classes = [], onAddTeacher, onAddCourse, onAddClass, onAddScheduleItem }: SchedulerFormProps) {
     const [activeForm, setActiveForm] = useState<'teacher' | 'course' | 'class' | 'schedule'>('teacher');
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, callback: (formData: FormData) => void) => {
+        e.preventDefault();
+        setLoading(true);
+        const formData = new FormData(e.target as HTMLFormElement);
+        await callback(formData);
+        setLoading(false);
+    };
 
     return (
         <div className="space-y-4">
@@ -47,30 +56,16 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
             </div>
 
             {activeForm === 'teacher' && (
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.target as HTMLFormElement);
-                        onAddTeacher(formData);
-                    }}
-                    className="space-y-2"
-                >
+                <form onSubmit={(e) => handleSubmit(e, onAddTeacher)} className="space-y-2">
                     <input type="text" name="name" placeholder="Teacher Name" className="w-full p-2 border rounded" required />
-                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-                        Add Teacher
+                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded" disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Teacher'}
                     </button>
                 </form>
             )}
 
             {activeForm === 'course' && (
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.target as HTMLFormElement);
-                        onAddCourse(formData);
-                    }}
-                    className="space-y-2"
-                >
+                <form onSubmit={(e) => handleSubmit(e, onAddCourse)} className="space-y-2">
                     <input type="text" name="name" placeholder="Course Name" className="w-full p-2 border rounded" required />
                     <select name="teacherId" className="w-full p-2 border rounded" required>
                         <option value="">Select Teacher</option>
@@ -80,38 +75,24 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                             </option>
                         ))}
                     </select>
-                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-                        Add Course
+                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded" disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Course'}
                     </button>
                 </form>
             )}
 
             {activeForm === 'class' && (
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.target as HTMLFormElement);
-                        onAddClass(formData);
-                    }}
-                    className="space-y-2"
-                >
+                <form onSubmit={(e) => handleSubmit(e, onAddClass)} className="space-y-2">
                     <input type="text" name="name" placeholder="Class Name" className="w-full p-2 border rounded" required />
                     <input type="text" name="roomNumber" placeholder="Room Number" className="w-full p-2 border rounded" required />
-                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-                        Add Class
+                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded" disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Class'}
                     </button>
                 </form>
             )}
 
             {activeForm === 'schedule' && (
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.target as HTMLFormElement);
-                        onAddScheduleItem(formData);
-                    }}
-                    className="space-y-2"
-                >
+                <form onSubmit={(e) => handleSubmit(e, onAddScheduleItem)} className="space-y-2">
                     <select name="day" className="w-full p-2 border rounded" required>
                         <option value="">Select Day</option>
                         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
@@ -138,8 +119,8 @@ export default function SchedulerForm({ teachers = [], courses = [], classes = [
                             </option>
                         ))}
                     </select>
-                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-                        Add Schedule Item
+                    <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded" disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Schedule Item'}
                     </button>
                 </form>
             )}
