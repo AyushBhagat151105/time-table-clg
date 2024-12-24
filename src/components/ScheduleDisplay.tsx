@@ -92,33 +92,37 @@ export default function ScheduleDisplay({ schedule, courses, teachers, classes, 
   return (
       <div className="overflow-x-auto w-max">
         <div className="flex justify-between mb-4">
-          <button onClick={generatePDF} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Export to PDF</button>
-          <button onClick={clearSchedule} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Clear Schedule</button>
+          <button onClick={generatePDF} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Export
+            to PDF
+          </button>
+          <button onClick={clearSchedule} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Clear
+            Schedule
+          </button>
         </div>
-        <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
-          <thead className="bg-gray-200">
+        <table className="min-w-full bg-white border border-gray-300 shadow-md rounded-lg table-fixed">
+          <thead className="bg-gray-200 text-gray-700">
           <tr>
-            <th className="border p-2">Day/Time</th>
+            <th className="border p-2 w-20">Day/Time</th>
             {days.map(day => (
-                <th key={day} className="border p-2">{day}</th>
+                <th key={day} className="border p-2 w-40">{day}</th>
             ))}
           </tr>
           </thead>
           <tbody>
-          {Array.from({ length: 18 * 2 }, (_, i) => {
+          {Array.from({length: 18 * 2}, (_, i) => {
             const hour = Math.floor(i / 2) + 7; // Start from 7 AM
             const minute = i % 2 === 0 ? '00' : '30';
             return `${hour}:${minute}`;
           }).map(time => (
               <tr key={time} className="hover:bg-gray-100">
-                <td className="border p-2">{formatTime(time)}</td>
+                <td className="border p-2 text-center font-semibold">{formatTime(time)}</td>
                 {days.map(day => {
                   const item = schedule.find(s => s.day === day && s.startTime === time);
                   return (
-                      <td key={`${day}-${time}`} className="border p-2">
+                      <td key={`${day}-${time}`} className="border p-2 text-center">
                         {item && (
-                            <div>
-                              <div className="font-semibold">{getCourseName(item.courseId)}</div>
+                            <div className="space-y-1">
+                              <div className="font-semibold text-green-600">{getCourseName(item.courseId)}</div>
                               <div className="text-sm text-gray-500">{getTeacherName(item.courseId)}</div>
                               <div className="text-sm text-gray-500">{getClassName(item.classId)}</div>
                               <div className="text-sm text-gray-500">
@@ -133,6 +137,7 @@ export default function ScheduleDisplay({ schedule, courses, teachers, classes, 
           ))}
           </tbody>
         </table>
+
       </div>
   );
 }
