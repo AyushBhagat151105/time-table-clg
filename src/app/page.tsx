@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { getTeachers, getCourses, getClasses, getSchedule, addTeacher, addCourse, addClass, addScheduleItem } from '../app/actions';
 import SchedulerForm from "@/components/SchedulerForm";
 import ScheduleDisplay from "@/components/ScheduleDisplay";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type Teacher = {
     id: string;
@@ -54,6 +56,9 @@ export default function Home() {
         const result = await addTeacher(formData);
         if (result.success) {
             setTeachers(await getTeachers());
+            toast.success('Teacher added successfully!');
+        } else {
+            toast.error(result.error || 'Failed to add teacher.');
         }
     };
 
@@ -61,6 +66,9 @@ export default function Home() {
         const result = await addCourse(formData);
         if (result.success) {
             setCourses(await getCourses());
+            toast.success('Course added successfully!');
+        } else {
+            toast.error(result.error || 'Failed to add course.');
         }
     };
 
@@ -68,6 +76,9 @@ export default function Home() {
         const result = await addClass(formData);
         if (result.success) {
             setClasses(await getClasses());
+            toast.success('Class added successfully!');
+        } else {
+            toast.error(result.error || 'Failed to add class.');
         }
     };
 
@@ -75,6 +86,9 @@ export default function Home() {
         const result = await addScheduleItem(formData);
         if (result.success) {
             setSchedule(await getSchedule());
+            toast.success('Schedule item added successfully!');
+        } else {
+            toast.error(result.error || 'Failed to add schedule item.');
         }
     };
 
@@ -84,7 +98,8 @@ export default function Home() {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-1">College Scheduler </h1>
+            <ToastContainer />
+            <h1 className="text-2xl font-bold mb-1">College Scheduler</h1>
             <p className="mb-4 font-extrabold">Developed by Ayush Bhagat🔪</p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <SchedulerForm
