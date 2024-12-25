@@ -1,4 +1,5 @@
-import jsPDF from "jspdf";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 type ScheduleDisplayProps = {
   schedule: {
@@ -68,8 +69,6 @@ export default function ScheduleDisplay({ schedule, courses, teachers, classes, 
       tableRows.push([item.day, time, courseName, teacherName, className]);
     });
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     doc.autoTable(tableColumn, tableRows, { startY: 20 });
     doc.text('Schedule', 14, 15);
     doc.save('schedule.pdf');
